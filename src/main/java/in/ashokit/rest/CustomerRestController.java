@@ -7,14 +7,18 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import in.ashokit.entity.Customer;
 import in.ashokit.repo.CustomerRepo;
+import in.ashokit.service.JwtService;
 
 @RestController
+@RequestMapping("/api")
 public class CustomerRestController {
 
 	@Autowired
@@ -25,6 +29,14 @@ public class CustomerRestController {
 
 	@Autowired
 	private AuthenticationManager authManager;
+	
+	@Autowired
+	private JwtService jwt;
+	
+	@GetMapping("/welcome")
+	public String welcome() {
+		return "welcome to ashokit";
+	}
 
 	@PostMapping("/login")
 	public ResponseEntity<String> loginCheck(@RequestBody Customer c) {
@@ -36,7 +48,8 @@ public class CustomerRestController {
 			Authentication authenticate = authManager.authenticate(token);
 
 			if (authenticate.isAuthenticated()) {
-				return new ResponseEntity<>("Welcome To Ashok IT", HttpStatus.OK);
+				String jwtToken = jwt.generateToken(c.getUname());
+				return new ResponseEntity<>(jwtToken, HttpStatus.OK);
 			}
 
 		} catch (Exception e) {
